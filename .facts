@@ -33,7 +33,7 @@
 ## navigation
 
 - label: the landing page primary navigation excludes CV and resume links
-  command: ! grep -R -i -E 'cv|resume|curriculum' src/data/site.ts src/components public
+  command: ! grep -R -I -i -E 'cv|resume|curriculum' src/data/site.ts src/components public
   tags: [spec, implemented]
 - label: the English landing page links to projects, temporary skills, and ai
   command: grep -Fq '{ label: "projects", href: "https://projects.micr.dev" }' src/data/site.ts && grep -Fq '{ label: "skills", href: "https://wip.micr.dev" }' src/data/site.ts && grep -Fq '{ label: "ai", href: "https://ai.micr.dev" }' src/data/site.ts
@@ -41,11 +41,14 @@
 - label: the Spanish landing page links to proyectos, temporary skills, and ia
   command: grep -Fq '{ label: "proyectos", href: "https://proyectos.micr.dev" }' src/data/site.ts && grep -Fq '{ label: "skills", href: "https://wip.micr.dev" }' src/data/site.ts && grep -Fq '{ label: "ia", href: "https://ai.micr.dev" }' src/data/site.ts
   tags: [spec, implemented]
+- label: the Spanish landing page localizes about, keebs, and room as sobre mi, teclados, and espacio
+  command: grep -Fq '{ label: "sobre mi", href: "https://about.micr.dev" }' src/data/site.ts && grep -Fq '{ label: "teclados", href: "https://microkeebs.micr.dev" }' src/data/site.ts && grep -Fq '{ label: "espacio", href: "https://room.micr.dev" }' src/data/site.ts
+  tags: [spec, implemented]
 - label: the landing page links to about, blog, room, and keebs public surfaces
   command: grep -Fq '{ label: "about", href: "https://about.micr.dev" }' src/data/site.ts && grep -Fq '{ label: "blog", href: "https://blog.micr.dev" }' src/data/site.ts && grep -Fq '{ label: "room", href: "https://room.micr.dev" }' src/data/site.ts && grep -Fq '{ label: "keebs", href: "https://microkeebs.micr.dev" }' src/data/site.ts
   tags: [spec, implemented]
-- label: primary navigation orders core proof before context and work-in-progress links
-  command: grep -Fq 'projects", href: "https://projects.micr.dev" },'$'\n''      { label: "room", href: "https://room.micr.dev" },'$'\n''      { label: "blog", href: "https://blog.micr.dev" },'$'\n''      { label: "about", href: "https://about.micr.dev" },'$'\n''      { label: "keebs", href: "https://microkeebs.micr.dev" },'$'\n''      { label: "ai", href: "https://ai.micr.dev" },'$'\n''      { label: "skills", href: "https://wip.micr.dev" }' src/data/site.ts
+- label: primary navigation orders projects, skills, ai, blog, about, keebs, then room
+  command: grep -Fq 'projects", href: "https://projects.micr.dev" },'$'\n''      { label: "skills", href: "https://wip.micr.dev" },'$'\n''      { label: "ai", href: "https://ai.micr.dev" },'$'\n''      { label: "blog", href: "https://blog.micr.dev" },'$'\n''      { label: "about", href: "https://about.micr.dev" },'$'\n''      { label: "keebs", href: "https://microkeebs.micr.dev" },'$'\n''      { label: "room", href: "https://room.micr.dev" }' src/data/site.ts && grep -Fq 'proyectos", href: "https://proyectos.micr.dev" },'$'\n''      { label: "skills", href: "https://wip.micr.dev" },'$'\n''      { label: "ia", href: "https://ai.micr.dev" },'$'\n''      { label: "blog", href: "https://blog.micr.dev" },'$'\n''      { label: "sobre mi", href: "https://about.micr.dev" },'$'\n''      { label: "teclados", href: "https://microkeebs.micr.dev" },'$'\n''      { label: "espacio", href: "https://room.micr.dev" }' src/data/site.ts
   tags: [spec, implemented]
 - label: social links expose public Microck GitHub, X, and YouTube profiles
   command: grep -Fq 'https://github.com/Microck' src/data/site.ts && grep -Fq 'https://x.com/JustMicrock' src/data/site.ts && grep -Fq 'https://www.youtube.com/@Microck' src/data/site.ts && ! grep -R -i 'linkedin' src/data/site.ts public

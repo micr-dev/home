@@ -1,0 +1,875 @@
+---
+import ExternalArrow from "./external-arrow.astro";
+import type { Locale } from "../data/site";
+import { content } from "../data/site";
+
+type Props = {
+  locale: Locale;
+};
+
+const page = content[Astro.props.locale];
+---
+
+<main class="page-shell" data-locale={page.locale}>
+  <nav class="language-switcher" aria-label="language">
+    <a
+      class:list={["language-link", page.locale === "es" && "active"]}
+      href="/es"
+      data-language-choice="es"
+      data-sound="language"
+      aria-current={page.locale === "es" ? "page" : undefined}
+    >
+      es
+    </a>
+    <a
+      class:list={["language-link", page.locale === "en" && "active"]}
+      href="/en"
+      data-language-choice="en"
+      data-sound="language"
+      aria-current={page.locale === "en" ? "page" : undefined}
+    >
+      en
+    </a>
+  </nav>
+
+  <section class="landing-card" aria-labelledby="person-name">
+    <header class="intro block-in">
+      <h1 id="person-name">
+        <button class="name-button" type="button" data-name-trigger data-name={page.name}>
+          <span class="name-text">{page.name}</span>
+          <span class="name-ghost" aria-hidden="true">{page.name}</span>
+          <span class="name-pronunciation" data-pronunciation="/miˈkrɑk/" aria-hidden="true"></span>
+        </button>
+      </h1>
+      <p>{page.subtitle}</p>
+    </header>
+
+    <nav class="primary-links" aria-label="primary">
+      {
+        page.nav.map((link, index) => (
+          <a
+            class="animated-link block-in"
+            href={link.href}
+            style={`--delay: ${0.05 + index * 0.05}s`}
+          >
+            <span>{link.label}</span>
+            <ExternalArrow />
+          </a>
+        ))
+      }
+    </nav>
+
+    <footer class="social-footer block-in" style="--delay: 0.24s">
+      {
+        page.socials.map((link) => (
+          <a href={link.href} target="_blank" rel="noreferrer">
+            {link.label}
+          </a>
+        ))
+      }
+    </footer>
+
+    <section class="agent-block block-in" style="--delay: 0.3s" aria-labelledby="agent-label">
+      <p id="agent-label">{page.agentLabel}</p>
+      <div class="tooltip-wrap">
+        <button
+          class="copy-button"
+          type="button"
+          data-copy-prompt={page.copyPrompt}
+          data-copy-label={page.copyLabel}
+          data-copied-label={page.copiedLabel}
+          aria-describedby="copy-tooltip"
+          aria-label={page.copyLabel}
+        >
+          <span class="copy-label copy-label-default">{page.copyLabel}</span>
+          <span class="copy-label copy-label-copied" aria-hidden="true">{page.copiedLabel}</span>
+        </button>
+        <span class="tooltip" id="copy-tooltip" role="tooltip">{page.tooltip}</span>
+      </div>
+    </section>
+  </section>
+
+  <script src="/matter.min.js" is:inline></script>
+  <script is:inline>
+    const initMicrockLanding = () => {
+    const Matter = window.Matter;
+    if (!Matter) {
+      return;
+    }
+
+    const storeChoice = (locale) => {
+      try {
+        window.localStorage.setItem("microck-language", locale);
+      } catch {
+        // localStorage can be disabled; links still navigate correctly.
+      }
+    };
+
+    document.querySelectorAll("[data-language-choice]").forEach((link) => {
+      link.addEventListener("click", () => {
+        storeChoice(link.getAttribute("data-language-choice"));
+      });
+    });
+
+    document.querySelectorAll("[data-name-trigger]").forEach((button) => {
+      const threshold = 22;
+      const wobbleStart = 8;
+      const idleGraceMs = 1500;
+      const decayIntervalMs = 800;
+      const hardResetMs = 8000;
+      const gravityScale = 3.6e-3;
+      const restitution = 0.62;
+      const wallFrictionTangent = 0.8;
+      const bodyFriction = 0.35;
+      const bodyFrictionAir = 0.018;
+      const bodyDensity = 0.0015;
+      const sleepThresholdFrames = 100;
+      const wallThickness = 50;
+      const detachInitialVelocityY = -3;
+      const detachKickMax = 1.5;
+      const detachKickMin = 0.7;
+      const snapRadius = 22;
+      const magneticRadius = 70;
+      const magneticPullFactor = 0.65;
+      const minDetachMs = 1400;
+      const autoRehangMs = 12000;
+      const fixedDeltaMs = 1000 / 60;
+      const maxSubsteps = 5;
+      const maxFrameMs = fixedDeltaMs * maxSubsteps;
+      const maxOmegaPerStep = 0.32;
+      const maxVelocityPerStep = 28;
+      const pronunciationCount = 9;
+      const pronunciationFiles = Array.from(
+        { length: pronunciationCount },
+        (_, index) => `/microck-pronunciation-${index + 1}.webm`,
+      );
+      const soundFiles = ["/pop.webm", ...pronunciationFiles];
+      let touchCount = 0;
+      let decayTimer;
+      let hardResetTimer;
+      let pronunciationBag = [];
+      let lastPronunciation = null;
+      let rumble = null;
+      let audioContext = null;
+
+      if (typeof Audio !== "undefined") {
+        for (const source of soundFiles) {
+          const audio = new Audio(source);
+          audio.preload = "auto";
+        }
+      }
+
+      const playFile = (source, volume) => {
+        const audio = new Audio(source);
+        audio.volume = volume;
+        audio.play().catch(() => {});
+      };
+
+      const refillPronunciationBag = () => {
+        const next = pronunciationFiles.map((_, index) => index);
+        for (let index = next.length - 1; index > 0; index -= 1) {
+          const swapIndex = Math.floor(Math.random() * (index + 1));
+          [next[index], next[swapIndex]] = [next[swapIndex], next[index]];
+        }
+
+        if (lastPronunciation !== null && next[next.length - 1] === lastPronunciation) {
+          [next[next.length - 1], next[0]] = [next[0], next[next.length - 1]];
+        }
+
+        pronunciationBag = next;
+      };
+
+      const playNamePronunciation = () => {
+        if (pronunciationBag.length === 0) {
+          refillPronunciationBag();
+        }
+
+        const index = pronunciationBag.pop();
+        lastPronunciation = index;
+        playFile(pronunciationFiles[index], 0.45);
+      };
+
+      const audio = () => {
+        if (!audioContext) {
+          audioContext = new AudioContext({ latencyHint: "interactive" });
+        }
+
+        return audioContext;
+      };
+
+      const ensureRumble = () => {
+        if (rumble) {
+          return rumble;
+        }
+
+        const context = audio();
+        const panner = context.createStereoPanner();
+        panner.pan.value = 0;
+        panner.connect(context.destination);
+
+        const panLfo = context.createOscillator();
+        panLfo.type = "sine";
+        panLfo.frequency.value = 3;
+        const panLfoGain = context.createGain();
+        panLfoGain.gain.value = 0.5;
+        panLfo.connect(panLfoGain);
+        panLfoGain.connect(panner.pan);
+
+        const master = context.createGain();
+        master.gain.value = 0;
+        master.connect(panner);
+
+        const osc1 = context.createOscillator();
+        osc1.type = "sine";
+        osc1.frequency.value = 42;
+        osc1.connect(master);
+
+        const harmonicGain = context.createGain();
+        harmonicGain.gain.value = 0.25;
+        const osc2 = context.createOscillator();
+        osc2.type = "triangle";
+        osc2.frequency.value = 68;
+        osc2.connect(harmonicGain).connect(master);
+
+        const lfo = context.createOscillator();
+        lfo.type = "sine";
+        lfo.frequency.value = 5;
+        const lfoGain = context.createGain();
+        lfoGain.gain.value = 3;
+        lfo.connect(lfoGain);
+        lfoGain.connect(osc1.frequency);
+        lfoGain.connect(osc2.frequency);
+
+        osc1.start();
+        osc2.start();
+        lfo.start();
+        panLfo.start();
+
+        rumble = { osc1, osc2, lfo, lfoGain, harmonicGain, master, panner, panLfo, panLfoGain };
+        return rumble;
+      };
+
+      const stopRumble = () => {
+        if (!rumble || !audioContext) {
+          return;
+        }
+
+        const now = audioContext.currentTime;
+        rumble.master.gain.cancelScheduledValues(now);
+        rumble.master.gain.setTargetAtTime(0, now, 0.035);
+        const currentRumble = rumble;
+        rumble = null;
+
+        window.setTimeout(() => {
+          try {
+            currentRumble.osc1.stop();
+          } catch {}
+          try {
+            currentRumble.osc2.stop();
+          } catch {}
+          try {
+            currentRumble.lfo.stop();
+          } catch {}
+          try {
+            currentRumble.panLfo.stop();
+          } catch {}
+          try {
+            currentRumble.master.disconnect();
+          } catch {}
+          try {
+            currentRumble.panner.disconnect();
+          } catch {}
+        }, 300);
+      };
+
+      const setRumbleIntensity = (progress) => {
+        if (progress <= 0) {
+          stopRumble();
+          return;
+        }
+
+        const currentRumble = ensureRumble();
+        const context = audio();
+        const now = context.currentTime;
+        const volume = 0.04 + (0.26 - 0.04) * progress;
+        const lfoDepth = 3 + (16 - 3) * progress;
+        const lfoFrequency = 5 + (14 - 5) * progress;
+        const harmonicBlend = 0.25 + 0.45 * progress;
+        const panFrequency = 3 + (12 - 3) * progress;
+        const panDepth = 0.5 + (1 - 0.5) * progress;
+
+        currentRumble.master.gain.cancelScheduledValues(now);
+        currentRumble.master.gain.setTargetAtTime(volume, now, 0.06);
+        currentRumble.lfoGain.gain.cancelScheduledValues(now);
+        currentRumble.lfoGain.gain.setTargetAtTime(lfoDepth, now, 0.06);
+        currentRumble.lfo.frequency.cancelScheduledValues(now);
+        currentRumble.lfo.frequency.setTargetAtTime(lfoFrequency, now, 0.06);
+        currentRumble.harmonicGain.gain.cancelScheduledValues(now);
+        currentRumble.harmonicGain.gain.setTargetAtTime(harmonicBlend, now, 0.06);
+        currentRumble.panLfo.frequency.cancelScheduledValues(now);
+        currentRumble.panLfo.frequency.setTargetAtTime(panFrequency, now, 0.06);
+        currentRumble.panLfoGain.gain.cancelScheduledValues(now);
+        currentRumble.panLfoGain.gain.setTargetAtTime(panDepth, now, 0.06);
+      };
+
+      const clearTimers = () => {
+        window.clearTimeout(decayTimer);
+        window.clearTimeout(hardResetTimer);
+      };
+
+      const setWobble = () => {
+        if (touchCount < wobbleStart) {
+          button.style.removeProperty("--name-wobble-rot");
+          button.style.removeProperty("--name-wobble-shift");
+          button.classList.remove("wobbling");
+          stopRumble();
+          return;
+        }
+
+        const progress = Math.pow((touchCount - wobbleStart) / (threshold - wobbleStart), 0.6);
+        const rotation = 0.4 + (4 - 0.4) * progress;
+        const shift = 0.3 + (2 - 0.3) * progress;
+        button.style.setProperty("--name-wobble-rot", `${rotation}deg`);
+        button.style.setProperty("--name-wobble-shift", `${shift}px`);
+        button.classList.remove("wobbling");
+        void button.offsetWidth;
+        button.classList.add("wobbling");
+        setRumbleIntensity(progress);
+      };
+
+      const resetCount = () => {
+        touchCount = 0;
+        clearTimers();
+        setWobble();
+      };
+
+      const scheduleDecay = () => {
+        clearTimers();
+
+        const tickDown = () => {
+          touchCount = Math.max(0, touchCount - 1);
+          setWobble();
+
+          if (touchCount > 0) {
+            decayTimer = window.setTimeout(tickDown, decayIntervalMs);
+          }
+        };
+
+        decayTimer = window.setTimeout(tickDown, idleGraceMs);
+        hardResetTimer = window.setTimeout(resetCount, hardResetMs);
+      };
+
+      const playPop = () => {
+        playFile("/pop.webm", 0.3);
+      };
+
+      const clamp = (number, min, max) => Math.max(min, Math.min(max, number));
+      const lerp = (a, b, t) => a + (b - a) * t;
+
+      const capVector = (vx, vy, max) => {
+        const speedSquared = vx * vx + vy * vy;
+        if (speedSquared <= max * max) {
+          return { x: vx, y: vy };
+        }
+        const speed = Math.sqrt(speedSquared);
+        return { x: (vx * max) / speed, y: (vy * max) / speed };
+      };
+
+      const magnetStrengthAt = (x, y, origin) => {
+        const dx = origin.x + origin.w / 2 - x;
+        const dy = origin.y + origin.h / 2 - y;
+        const distance = Math.hypot(dx, dy);
+        const strength = distance < magneticRadius ? Math.sqrt(1 - distance / magneticRadius) : 0;
+        return { dx, dy, strength };
+      };
+
+      const capVelocities = (body) => {
+        if (Math.abs(body.angularVelocity) > maxOmegaPerStep) {
+          Matter.Body.setAngularVelocity(body, Math.sign(body.angularVelocity) * maxOmegaPerStep);
+        }
+
+        const capped = capVector(body.velocity.x, body.velocity.y, maxVelocityPerStep);
+        if (capped.x !== body.velocity.x || capped.y !== body.velocity.y) {
+          Matter.Body.setVelocity(body, capped);
+        }
+      };
+
+      const applyManualBounce = (body, previousVelocityX, previousVelocityY) => {
+        const bounds = body.bounds;
+        const impactThreshold = 3;
+        let velocityX = body.velocity.x;
+        let velocityY = body.velocity.y;
+        let bounced = false;
+
+        if (bounds.max.y >= window.innerHeight - 1 && previousVelocityY > impactThreshold) {
+          velocityY = -previousVelocityY * restitution;
+          velocityX = body.velocity.x * wallFrictionTangent;
+          bounced = true;
+        } else if (bounds.min.y <= 1 && previousVelocityY < -impactThreshold) {
+          velocityY = -previousVelocityY * restitution;
+          velocityX = body.velocity.x * wallFrictionTangent;
+          bounced = true;
+        }
+
+        if (bounds.min.x <= 1 && previousVelocityX < -impactThreshold) {
+          velocityX = -previousVelocityX * restitution;
+          if (!bounced) {
+            velocityY = body.velocity.y * wallFrictionTangent;
+          }
+          bounced = true;
+        } else if (bounds.max.x >= window.innerWidth - 1 && previousVelocityX > impactThreshold) {
+          velocityX = -previousVelocityX * restitution;
+          if (!bounced) {
+            velocityY = body.velocity.y * wallFrictionTangent;
+          }
+          bounced = true;
+        }
+
+        if (bounced) {
+          Matter.Body.setVelocity(body, { x: velocityX, y: velocityY });
+        }
+      };
+
+      const applyAngularMagnet = (body, origin) => {
+        const { strength } = magnetStrengthAt(body.position.x, body.position.y, origin);
+        if (strength <= 0) {
+          return;
+        }
+
+        const twoPi = Math.PI * 2;
+        let delta = body.angle % twoPi;
+        if (delta > Math.PI) {
+          delta -= twoPi;
+        } else if (delta < -Math.PI) {
+          delta += twoPi;
+        }
+
+        const angularAcceleration = (-0.045 * delta - 0.32 * body.angularVelocity) * strength;
+        Matter.Body.setAngularVelocity(body, body.angularVelocity + angularAcceleration);
+      };
+
+      const copyComputedTextStyle = (source, target) => {
+        const style = window.getComputedStyle(source);
+        target.style.fontFamily = style.fontFamily;
+        target.style.fontSize = style.fontSize;
+        target.style.fontWeight = style.fontWeight;
+        target.style.fontStyle = style.fontStyle;
+        target.style.fontStretch = style.fontStretch;
+        target.style.fontVariantNumeric = style.fontVariantNumeric;
+        target.style.fontFeatureSettings = style.fontFeatureSettings;
+        target.style.letterSpacing = style.letterSpacing;
+        target.style.lineHeight = style.lineHeight;
+        target.style.color = style.color;
+      };
+
+      const measureOrigin = (element) => {
+        const rect = element.getBoundingClientRect();
+        return {
+          x: rect.left,
+          y: rect.top,
+          w: rect.width,
+          h: rect.height,
+        };
+      };
+
+      const buildWalls = () => {
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+        const thickness = wallThickness;
+        const options = {
+          isStatic: true,
+          restitution,
+          friction: bodyFriction,
+        };
+
+        return [
+          Matter.Bodies.rectangle(width / 2, -thickness / 2, width + 2 * thickness, thickness, options),
+          Matter.Bodies.rectangle(width / 2, height + thickness / 2, width + 2 * thickness, thickness, options),
+          Matter.Bodies.rectangle(-thickness / 2, height / 2, thickness, height + 2 * thickness, options),
+          Matter.Bodies.rectangle(width + thickness / 2, height / 2, thickness, height + 2 * thickness, options),
+        ];
+      };
+
+      const detachName = (clientX) => {
+        const text = button.querySelector(".name-text");
+        const origin = measureOrigin(text);
+        const floater = document.createElement("span");
+        const centerX = origin.x + origin.w / 2;
+        const offset = clamp((clientX - centerX) / (origin.w / 2 || 1), -1, 1);
+        const kickMagnitude = lerp(detachKickMin, detachKickMax, Math.abs(offset));
+        const kickSign = offset === 0 ? (Math.random() < 0.5 ? -1 : 1) : Math.sign(offset);
+        const engine = Matter.Engine.create({
+          gravity: { x: 0, y: 1, scale: gravityScale },
+          enableSleeping: true,
+        });
+        const body = Matter.Bodies.rectangle(
+          origin.x + origin.w / 2,
+          origin.y + origin.h / 2,
+          origin.w,
+          origin.h,
+          {
+            restitution,
+            friction: bodyFriction,
+            frictionAir: bodyFrictionAir,
+            density: bodyDensity,
+            sleepThreshold: sleepThresholdFrames,
+          },
+        );
+        let walls = buildWalls();
+        let dragConstraint = null;
+        let pointerId = null;
+        let cursorTrail = [];
+        let accumulator = 0;
+        let animationFrame = 0;
+        let phase = "sim";
+        let lastRestStart = null;
+        const detachedAt = performance.now();
+        const originCenterX = origin.x + origin.w / 2;
+        const originCenterY = origin.y + origin.h / 2;
+        const renderState = { x: 0, y: 0, rotation: 0 };
+        const previousState = { x: originCenterX, y: originCenterY, angle: 0 };
+        const currentState = { x: originCenterX, y: originCenterY, angle: 0 };
+
+        floater.className = "name-floater";
+        floater.textContent = button.getAttribute("data-name") || "Microck";
+        floater.style.left = `${origin.x}px`;
+        floater.style.top = `${origin.y}px`;
+        floater.style.width = `${origin.w}px`;
+        floater.style.height = `${origin.h}px`;
+        copyComputedTextStyle(text, floater);
+        Matter.Body.setVelocity(body, {
+          x: kickMagnitude * kickSign,
+          y: detachInitialVelocityY,
+        });
+        Matter.World.add(engine.world, [body, ...walls]);
+
+        clearTimers();
+        touchCount = 0;
+        setWobble();
+        stopRumble();
+        button.classList.add("detached");
+        playPop();
+        document.body.appendChild(floater);
+
+        const writeTransform = (x, y, rotation) => {
+          floater.style.transform = `translate3d(${x}px, ${y}px, 0) rotate(${rotation}deg)`;
+        };
+
+        const cleanup = () => {
+          cancelAnimationFrame(animationFrame);
+          window.removeEventListener("resize", resize);
+          window.removeEventListener("keydown", onKeyDown);
+          Matter.World.clear(engine.world, false);
+          Matter.Engine.clear(engine);
+          floater.remove();
+          button.classList.remove("detached");
+        };
+
+        const triggerRehang = () => {
+          if (phase === "snapping") {
+            return;
+          }
+          phase = "snapping";
+          Matter.Body.setStatic(body, true);
+          const startX = renderState.x;
+          const startY = renderState.y;
+          let startRotation = renderState.rotation % 360;
+          if (startRotation > 180) {
+            startRotation -= 360;
+          } else if (startRotation <= -180) {
+            startRotation += 360;
+          }
+          const start = performance.now();
+          const duration = 520;
+
+          const snap = (now) => {
+            const progress = clamp((now - start) / duration, 0, 1);
+            const eased = 1 - Math.pow(1 - progress, 3);
+            const k = 1 - eased;
+            renderState.x = startX * k;
+            renderState.y = startY * k;
+            renderState.rotation = startRotation * k;
+            writeTransform(renderState.x, renderState.y, renderState.rotation);
+
+            if (progress < 1) {
+              animationFrame = requestAnimationFrame(snap);
+              return;
+            }
+
+            cleanup();
+          };
+
+          animationFrame = requestAnimationFrame(snap);
+        };
+
+        const resize = () => {
+          Matter.World.remove(engine.world, walls);
+          walls = buildWalls();
+          Matter.World.add(engine.world, walls);
+
+          const halfWidth = (body.bounds.max.x - body.bounds.min.x) / 2;
+          const halfHeight = (body.bounds.max.y - body.bounds.min.y) / 2;
+          const clampedX = clamp(body.position.x, halfWidth + 1, window.innerWidth - halfWidth - 1);
+          const clampedY = clamp(body.position.y, halfHeight + 1, window.innerHeight - halfHeight - 1);
+          if (clampedX !== body.position.x || clampedY !== body.position.y) {
+            Matter.Body.setPosition(body, { x: clampedX, y: clampedY });
+            Matter.Body.setVelocity(body, { x: 0, y: 0 });
+          }
+          Matter.Sleeping.set(body, false);
+        };
+
+        const onKeyDown = (event) => {
+          if (event.key === "Escape") {
+            triggerRehang();
+          }
+        };
+
+        const step = (now, deltaMs = fixedDeltaMs) => {
+          if (phase !== "sim") {
+            return;
+          }
+
+          const dragging = pointerId !== null;
+          accumulator += Math.min(deltaMs, maxFrameMs);
+          let steps = 0;
+
+          while (accumulator >= fixedDeltaMs && steps < maxSubsteps) {
+            previousState.x = currentState.x;
+            previousState.y = currentState.y;
+            previousState.angle = currentState.angle;
+
+            const previousVelocityX = body.velocity.x;
+            const previousVelocityY = body.velocity.y;
+            Matter.Engine.update(engine, fixedDeltaMs);
+
+            if (dragging) {
+              applyAngularMagnet(body, origin);
+            } else {
+              applyManualBounce(body, previousVelocityX, previousVelocityY);
+            }
+
+            capVelocities(body);
+            currentState.x = body.position.x;
+            currentState.y = body.position.y;
+            currentState.angle = body.angle;
+            accumulator -= fixedDeltaMs;
+            steps += 1;
+          }
+
+          if (steps === maxSubsteps) {
+            accumulator = 0;
+          }
+
+          const alpha = clamp(accumulator / fixedDeltaMs, 0, 1);
+          const x = lerp(previousState.x, currentState.x, alpha) - originCenterX;
+          const y = lerp(previousState.y, currentState.y, alpha) - originCenterY;
+          const rotation = (lerp(previousState.angle, currentState.angle, alpha) * 180) / Math.PI;
+
+          if (x !== renderState.x || y !== renderState.y || rotation !== renderState.rotation) {
+            renderState.x = x;
+            renderState.y = y;
+            renderState.rotation = rotation;
+            writeTransform(x, y, rotation);
+          }
+
+          if (body.isSleeping) {
+            if (lastRestStart === null) {
+              lastRestStart = performance.now();
+            } else if (performance.now() - lastRestStart >= autoRehangMs) {
+              triggerRehang();
+              return;
+            }
+          } else {
+            lastRestStart = null;
+          }
+
+          animationFrame = requestAnimationFrame((nextNow) => step(nextNow, nextNow - now));
+        };
+
+        const finishDrag = (event) => {
+          if (pointerId !== event.pointerId) {
+            return;
+          }
+
+          pointerId = null;
+          floater.style.cursor = "grab";
+
+          try {
+            floater.releasePointerCapture(event.pointerId);
+          } catch {}
+
+          if (dragConstraint) {
+            Matter.World.remove(engine.world, dragConstraint);
+            dragConstraint = null;
+          }
+
+          if (cursorTrail.length >= 2) {
+            const first = cursorTrail[0];
+            const last = cursorTrail[cursorTrail.length - 1];
+            const seconds = (last.t - first.t) / 1000;
+            if (seconds > 1e-3) {
+              const velocity = capVector(
+                (last.x - first.x) / seconds / 60,
+                (last.y - first.y) / seconds / 60,
+                maxVelocityPerStep,
+              );
+              Matter.Body.setVelocity(body, velocity);
+            }
+          }
+
+          const lastCursor = cursorTrail[cursorTrail.length - 1];
+          cursorTrail = [];
+          const sinceDetach = performance.now() - detachedAt;
+          const bodyClose = Math.hypot(renderState.x, renderState.y) < snapRadius;
+          const cursorInMagnet = lastCursor
+            ? magnetStrengthAt(lastCursor.x, lastCursor.y, origin).strength > 0
+            : false;
+
+          if (sinceDetach >= minDetachMs && (bodyClose || cursorInMagnet)) {
+            triggerRehang();
+          }
+        };
+
+        floater.addEventListener("pointerdown", (event) => {
+          if (phase === "snapping") {
+            return;
+          }
+
+          floater.setPointerCapture(event.pointerId);
+          floater.style.cursor = "grabbing";
+          pointerId = event.pointerId;
+          cursorTrail = [{ x: event.clientX, y: event.clientY, t: performance.now() }];
+          Matter.Sleeping.set(body, false);
+
+          const dx = event.clientX - body.position.x;
+          const dy = event.clientY - body.position.y;
+          const angle = -body.angle;
+          const cos = Math.cos(angle);
+          const sin = Math.sin(angle);
+          const localX = dx * cos - dy * sin;
+          const localY = dx * sin + dy * cos;
+
+          dragConstraint = Matter.Constraint.create({
+            pointA: { x: event.clientX, y: event.clientY },
+            bodyB: body,
+            pointB: { x: localX, y: localY },
+            length: 0,
+            stiffness: 0.45,
+            damping: 0.25,
+          });
+          Matter.World.add(engine.world, dragConstraint);
+        });
+
+        floater.addEventListener("pointermove", (event) => {
+          if (pointerId !== event.pointerId || !dragConstraint) {
+            return;
+          }
+
+          const magnet = magnetStrengthAt(event.clientX, event.clientY, origin);
+          const pull = magneticPullFactor * magnet.strength;
+          dragConstraint.pointA = {
+            x: event.clientX + magnet.dx * pull,
+            y: event.clientY + magnet.dy * pull,
+          };
+
+          const time = performance.now();
+          cursorTrail.push({ x: event.clientX, y: event.clientY, t: time });
+          const cutoff = time - 120;
+          while (cursorTrail.length > 2 && cursorTrail[0].t < cutoff) {
+            cursorTrail.shift();
+          }
+        });
+
+        floater.addEventListener("pointerup", finishDrag);
+        floater.addEventListener("pointercancel", finishDrag);
+
+        window.addEventListener("resize", resize);
+        window.addEventListener("keydown", onKeyDown);
+        animationFrame = requestAnimationFrame((now) => step(now));
+      };
+
+      button.addEventListener("click", (event) => {
+        if (button.classList.contains("detached")) {
+          return;
+        }
+
+        playNamePronunciation();
+
+        if (event.metaKey || event.ctrlKey) {
+          detachName(event.clientX);
+          return;
+        }
+
+        touchCount += 1;
+        scheduleDecay();
+
+        if (touchCount >= threshold) {
+          detachName(event.clientX);
+          return;
+        }
+
+        setWobble();
+      });
+    });
+
+    document.querySelectorAll("[data-copy-prompt]").forEach((button) => {
+      button.addEventListener("click", async () => {
+        const prompt = button.getAttribute("data-copy-prompt");
+        const label = button.getAttribute("data-copy-label");
+        const copiedLabel = button.getAttribute("data-copied-label");
+
+        const showCopied = () => {
+          window.playMicrockSound?.("success");
+          button.classList.add("copied");
+          button.setAttribute("aria-label", copiedLabel);
+          window.setTimeout(() => {
+            button.classList.remove("copied");
+            button.setAttribute("aria-label", label);
+          }, 1600);
+        };
+
+        const copyWithFallback = () => {
+          const field = document.createElement("textarea");
+          field.value = prompt;
+          field.setAttribute("readonly", "");
+          field.style.position = "fixed";
+          field.style.left = "-9999px";
+          field.style.top = "0";
+          document.body.appendChild(field);
+          field.select();
+
+          try {
+            return document.execCommand("copy");
+          } finally {
+            document.body.removeChild(field);
+          }
+        };
+
+        try {
+          if (navigator.clipboard?.writeText) {
+            await navigator.clipboard.writeText(prompt);
+            showCopied();
+            return;
+          }
+        } catch {
+          // Non-local HTTP pages often cannot use the async Clipboard API.
+        }
+
+        if (copyWithFallback()) {
+          showCopied();
+          return;
+        }
+
+        button.classList.remove("copied");
+        button.setAttribute("aria-label", label);
+      });
+    });
+    };
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", initMicrockLanding, { once: true });
+    } else {
+      initMicrockLanding();
+    }
+  </script>
+</main>

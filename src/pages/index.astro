@@ -1,0 +1,52 @@
+---
+import Base from "../layouts/base.astro";
+---
+
+<Base title="Microck" description="choose your language" lang="en">
+  <script is:inline slot="head">
+    (() => {
+      const languages = navigator.languages?.length
+        ? navigator.languages
+        : [navigator.language];
+      document.documentElement.dataset.gateLanguage = languages.some((language) =>
+        language?.toLowerCase().startsWith("es"),
+      )
+        ? "es"
+        : "en";
+    })();
+  </script>
+
+  <main class="gate-shell">
+    <section class="language-gate block-in" aria-labelledby="language-title">
+      <p id="language-title">
+        <span class="gate-title-en">choose your language</span>
+        <span class="gate-title-es">elige tu idioma</span>
+      </p>
+      <div class="gate-actions block-in" style="--delay: 0.06s">
+        <a href="/es" data-choice="es" data-sound="language">español</a>
+        <a href="/en" data-choice="en" data-sound="language">english</a>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    try {
+      const storedLanguage = window.localStorage.getItem("microck-language");
+      if (storedLanguage === "es" || storedLanguage === "en") {
+        window.location.replace(`/${storedLanguage}`);
+      }
+    } catch {
+      // The gate stays usable without storage.
+    }
+
+    document.querySelectorAll("[data-choice]").forEach((link) => {
+      link.addEventListener("click", () => {
+        try {
+          window.localStorage.setItem("microck-language", link.getAttribute("data-choice"));
+        } catch {
+          // Links still perform the language choice.
+        }
+      });
+    });
+  </script>
+</Base>

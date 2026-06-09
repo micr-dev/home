@@ -1,0 +1,130 @@
+# project
+
+- label: project builds successfully
+  command: npm run build
+- label: type checking passes
+  command: npx tsc --noEmit
+- label: package metadata uses the home project name rather than the previous project name
+  command: grep -Fq '"name": "home"' package.json && grep -Fq '"name": "home"' package-lock.json
+  tags: [spec, implemented]
+
+# domain
+
+- a LandingPage is the public Microck home page served as the main personal landing page
+- a PublicIdentity is the Microck identity and public technical profile, excluding the private real-name surface and CV files
+
+# website
+
+## identity
+
+- label: the landing page presents Microck as the primary public identity
+  command: grep -Fq 'name: "Microck"' src/data/site.ts && grep -Fq 'data-name={page.name}' src/components/landing-page.astro
+  tags: [spec, implemented]
+- label: the landing page does not expose the real-name identity
+  command: ! grep -R -i -E 'm[a]rcos|ja(e|é)n|j[a]en' src public package.json package-lock.json astro.config.mjs
+  tags: [spec, implemented]
+- label: the landing page does not expose the previous product identity or domain
+  command: ! grep -R -i 'r[e]fugio' src public package.json package-lock.json astro.config.mjs
+  tags: [spec, implemented]
+- label: site metadata uses Microck for localized page titles and root language selection
+  command: grep -Fq 'title: "Microck"' src/data/site.ts && grep -Fq '<Base title="Microck"' src/pages/index.astro
+  tags: [spec, implemented]
+
+## navigation
+
+- label: the landing page primary navigation excludes CV and resume links
+  command: ! grep -R -i -E 'cv|resume|curriculum' src/data/site.ts src/components public
+  tags: [spec, implemented]
+- label: the English landing page links to projects, temporary skills, and ai
+  command: grep -Fq '{ label: "projects", href: "https://projects.micr.dev" }' src/data/site.ts && grep -Fq '{ label: "skills", href: "https://wip.micr.dev" }' src/data/site.ts && grep -Fq '{ label: "ai", href: "https://ai.micr.dev" }' src/data/site.ts
+  tags: [spec, implemented]
+- label: the Spanish landing page links to proyectos, temporary skills, and ia
+  command: grep -Fq '{ label: "proyectos", href: "https://proyectos.micr.dev" }' src/data/site.ts && grep -Fq '{ label: "skills", href: "https://wip.micr.dev" }' src/data/site.ts && grep -Fq '{ label: "ia", href: "https://ai.micr.dev" }' src/data/site.ts
+  tags: [spec, implemented]
+- label: the landing page links to about, blog, room, and keebs public surfaces
+  command: grep -Fq '{ label: "about", href: "https://about.micr.dev" }' src/data/site.ts && grep -Fq '{ label: "blog", href: "https://blog.micr.dev" }' src/data/site.ts && grep -Fq '{ label: "room", href: "https://room.micr.dev" }' src/data/site.ts && grep -Fq '{ label: "keebs", href: "https://microkeebs.micr.dev" }' src/data/site.ts
+  tags: [spec, implemented]
+- label: primary navigation orders core proof before context and work-in-progress links
+  command: grep -Fq 'projects", href: "https://projects.micr.dev" },'$'\n''      { label: "room", href: "https://room.micr.dev" },'$'\n''      { label: "blog", href: "https://blog.micr.dev" },'$'\n''      { label: "about", href: "https://about.micr.dev" },'$'\n''      { label: "keebs", href: "https://microkeebs.micr.dev" },'$'\n''      { label: "ai", href: "https://ai.micr.dev" },'$'\n''      { label: "skills", href: "https://wip.micr.dev" }' src/data/site.ts
+  tags: [spec, implemented]
+- label: social links expose public Microck GitHub, X, and YouTube profiles
+  command: grep -Fq 'https://github.com/Microck' src/data/site.ts && grep -Fq 'https://x.com/JustMicrock' src/data/site.ts && grep -Fq 'https://www.youtube.com/@Microck' src/data/site.ts && ! grep -R -i 'linkedin' src/data/site.ts public
+  tags: [spec, implemented]
+
+## llms
+
+- label: English copy prompt points agents to the main English llms.txt route
+  command: grep -Fq '"Fetch https://micr.dev/en/llms.txt and follow its instructions exactly."' src/data/site.ts
+  tags: [spec, implemented]
+- label: Spanish copy prompt points agents to the main Spanish llms.txt route
+  command: grep -Fq '"Obtén https://micr.dev/es/llms.txt y sigue sus instrucciones exactamente."' src/data/site.ts
+  tags: [spec, implemented]
+- label: llms.txt uses Microck as the public identity without exposing the real name
+  command: grep -Fq '# Microck' public/en/llms.txt && grep -Fq '# Microck' public/es/llms.txt && ! grep -R -i -E 'm[a]rcos|ja(e|é)n|j[a]en' public/en/llms.txt public/es/llms.txt
+  tags: [spec, implemented]
+- label: llms.txt tells agents to treat the file as source of truth and not invent missing details
+  command: grep -Fq 'Treat this file as the source of truth for Microck.' public/en/llms.txt && grep -Fq 'Trata este archivo como la fuente de verdad sobre Microck.' public/es/llms.txt
+  tags: [spec, implemented]
+- label: llms.txt social branch lists GitHub, X, YouTube, and email without LinkedIn
+  command: grep -Fq 'https://github.com/Microck' public/en/llms.txt && grep -Fq 'https://x.com/JustMicrock' public/en/llms.txt && grep -Fq 'https://www.youtube.com/@Microck' public/en/llms.txt && grep -Fq 'contact@micr.dev' public/en/llms.txt && ! grep -R -i 'linkedin' public/en/llms.txt public/es/llms.txt
+  tags: [spec, implemented]
+- label: llms.txt lists wip.micr.dev as a public surface without making it an agent fetch route
+  command: grep -Fq 'https://wip.micr.dev' public/en/llms.txt && grep -Fq 'https://wip.micr.dev' public/es/llms.txt && ! grep -A1 -F 'Work in progress, active experiments' public/en/llms.txt | grep -Fq 'https://wip.micr.dev' && ! grep -A1 -F 'Trabajo en progreso, experimentos activos' public/es/llms.txt | grep -Fq 'https://wip.micr.dev' && ! grep -R -q 'https://skills.micr.dev' public/en/llms.txt public/es/llms.txt src/data/site.ts
+  tags: [spec, implemented]
+- label: llms.txt routes public interest and preference questions to the about llms.txt file
+  command: grep -Fq 'https://about.micr.dev' public/en/llms.txt && grep -Fq 'https://about.micr.dev' public/es/llms.txt && grep -Fq 'Fetch and read https://about.micr.dev/llms.txt.' public/en/llms.txt && grep -Fq 'Obtén y lee https://about.micr.dev/llms.txt.' public/es/llms.txt
+  tags: [spec, implemented]
+- label: llms.txt routes AI stack questions to the AI llms.txt file
+  command: grep -Fq 'Fetch and read https://ai.micr.dev/llms.txt.' public/en/llms.txt && grep -Fq 'Obtén y lee https://ai.micr.dev/llms.txt.' public/es/llms.txt
+  tags: [spec, implemented]
+- label: llms.txt lists the keyboards page as a public surface
+  command: grep -Fq 'Keyboards: https://microkeebs.micr.dev' public/en/llms.txt && grep -Fq 'Teclados: https://microkeebs.micr.dev' public/es/llms.txt
+  tags: [spec, implemented]
+
+## i18n
+
+- label: first-time visitors are prompted to choose Spanish or English before settling into a language route
+  command: grep -Fq 'choose your language' src/pages/index.astro && grep -Fq 'elige tu idioma' src/pages/index.astro
+  tags: [spec, implemented]
+- label: root-path visitors with a remembered language choice are redirected using the main landing localStorage key
+  command: grep -Fq 'microck-language' src/pages/index.astro && grep -Fq 'microck-language' src/components/landing-page.astro
+  tags: [spec, implemented]
+
+## design
+
+- label: the landing page remains a minimal text-first bilingual Astro site
+  command: test -f src/pages/en.astro && test -f src/pages/es.astro && grep -Fq 'output: "static"' astro.config.mjs
+  tags: [spec, implemented]
+- label: the landing page uses small local Linux-Esque cursor assets with native cursor fallbacks
+  command: test -f public/cursors/linux-esque-normal-select-28.png && test -f public/cursors/linux-esque-link-select-28.png && magick identify public/cursors/linux-esque-normal-select-28.png | grep -Fq '28x28' && magick identify public/cursors/linux-esque-link-select-28.png | grep -Fq '28x28' && grep -Fq 'cursor: var(--cursor-default);' src/styles/global.css && grep -Fq 'cursor: var(--cursor-pointer);' src/styles/global.css && grep -Fq 'auto' src/styles/global.css && grep -Fq 'pointer' src/styles/global.css
+  tags: [spec, implemented]
+- label: the landing page uses a solid dark background without gradients and avoids page scrolling
+  command: grep -q 'background: var(--background);' src/styles/global.css && ! grep -q 'linear-gradient' src/styles/global.css && grep -q 'overflow: hidden;' src/styles/global.css
+  tags: [spec, implemented]
+- label: the landing page and language gate are centered without upward translate offsets
+  command: ! grep -q 'translateY(-[0-9].*vh)' src/styles/global.css
+  tags: [spec, implemented]
+
+## interactions
+
+- label: interactive controls play subtle sound effects only after a user gesture
+  command: test -f public/pill-select.webm && grep -q 'playMicrockSound' src/layouts/base.astro && grep -q 'data-sound="language"' src/components/landing-page.astro && ! grep -R -q 'data-sound="link"' src/components src/pages
+  tags: [spec, implemented]
+- label: copy prompt success uses the same sound effect as language switching
+  command: grep -q 'success: "/pill-select.webm"' src/layouts/base.astro
+  tags: [spec, implemented]
+- label: clicking the Microck heading pronounces the public name
+  command: grep -Fq 'data-name-trigger' src/components/landing-page.astro && test "$(find public -maxdepth 1 -type f -name 'microck-pronunciation-*.webm' | wc -l)" -eq 9 && test ! -e public/microck-pronunciation-10.webm && test -f public/microck-pronunciation-1.webm && test -f public/microck-pronunciation-9.webm && ! find public -maxdepth 1 -type f -name 'microck-pronunciation-*.mp3' | grep -q . && grep -Fq 'const pronunciationCount = 9' src/components/landing-page.astro && grep -Fq 'const playNamePronunciation' src/components/landing-page.astro && grep -Fq 'playFile(pronunciationFiles[index], 0.45)' src/components/landing-page.astro
+  tags: [spec, implemented]
+- label: hovering or focusing the Microck heading reveals the /miˈkrɑk/ pronunciation from the word without shifting layout
+  command: grep -Fq 'class="name-pronunciation"' src/components/landing-page.astro && grep -Fq 'data-pronunciation="/miˈkrɑk/"' src/components/landing-page.astro && grep -Fq '.name-pronunciation::before' src/styles/global.css && grep -Fq 'content: attr(data-pronunciation);' src/styles/global.css && grep -Fq '.name-button:hover .name-pronunciation' src/styles/global.css && grep -Fq 'position: absolute;' src/styles/global.css && grep -Fq 'clip-path: inset(0 100% 0 0);' src/styles/global.css && grep -Fq 'font-family: var(--font-control);' src/styles/global.css && grep -Fq 'font-size: 13px;' src/styles/global.css && grep -Fq '.name-button.wobbling:not(.detached) .name-text' src/styles/global.css
+  tags: [spec, implemented]
+- label: repeated touches on the Microck heading follow the Lisse-style wobble and detach threshold
+  command: grep -Fq 'const threshold = 22' src/components/landing-page.astro && grep -Fq 'const wobbleStart = 8' src/components/landing-page.astro && grep -Fq 'const idleGraceMs = 1500' src/components/landing-page.astro && grep -Fq 'const decayIntervalMs = 800' src/components/landing-page.astro && grep -Fq 'const hardResetMs = 8000' src/components/landing-page.astro && grep -Fq 'setRumbleIntensity(progress)' src/components/landing-page.astro
+  tags: [spec, implemented]
+- label: after the Microck heading detaches the original slot stays reserved with a ghost and a fixed physics clone
+  command: test -f public/pop.webm && test -f public/matter.min.js && grep -Fq 'src="/matter.min.js" is:inline' src/components/landing-page.astro && grep -Fq 'button.classList.add("detached")' src/components/landing-page.astro && grep -Fq 'document.createElement("span")' src/components/landing-page.astro && grep -Fq 'document.body.appendChild(floater)' src/components/landing-page.astro && grep -Fq '.name-ghost' src/styles/global.css && grep -Fq 'Matter.Engine.create' src/components/landing-page.astro && grep -Fq 'Matter.Constraint.create' src/components/landing-page.astro
+  tags: [spec, implemented]
+- label: detached Microck physics uses Lisse-style fixed timestep, walls, drag, Escape reset, and auto rehang
+  command: grep -Fq 'const fixedDeltaMs = 1000 / 60' src/components/landing-page.astro && grep -Fq 'const maxSubsteps = 5' src/components/landing-page.astro && grep -Fq 'const wallThickness = 50' src/components/landing-page.astro && grep -Fq 'const autoRehangMs = 12000' src/components/landing-page.astro && grep -Fq 'event.key === "Escape"' src/components/landing-page.astro && grep -Fq 'floater.addEventListener("pointerdown"' src/components/landing-page.astro
+  tags: [spec, implemented]

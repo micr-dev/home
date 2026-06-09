@@ -1,0 +1,12 @@
+node_modules
+dist
+.astro
+.agents
+.claude
+.agent-runtime.json
+.verification
+.favicon-work
+.residue
+local.log
+*.log
+.vercel

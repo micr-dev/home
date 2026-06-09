@@ -1,0 +1,11 @@
+---
+import LandingPage from "../components/landing-page.astro";
+import { content } from "../data/site";
+import Base from "../layouts/base.astro";
+
+const page = content.en;
+---
+
+<Base title={page.title} description={page.description} lang={page.htmlLang}>
+  <LandingPage locale="en" />
+</Base>

@@ -1,0 +1,153 @@
+---
+import "../styles/global.css";
+
+type Props = {
+  title: string;
+  description: string;
+  lang: string;
+};
+
+const { title, description, lang } = Astro.props;
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#121212" />
+    <meta name="description" content={description} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <title>{title}</title>
+    <link id="favicon" rel="icon" href="/favicon-frames/frame-000.png" type="image/png" />
+    <script is:inline>
+      (() => {
+        const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+        const favicon = document.querySelector("#favicon");
+
+        if (reduceMotion.matches || !favicon) {
+          return;
+        }
+
+        const firstFrame = 0;
+        const frameCount = 60;
+        const canvas = document.createElement("canvas");
+        const context = canvas.getContext("2d");
+        let frameIndex = firstFrame;
+
+        canvas.width = 16;
+        canvas.height = 16;
+
+        const frames = Array.from({ length: frameCount }, (_, index) => {
+          const frame = new Image();
+          frame.decoding = "async";
+          frame.src = `/favicon-frames/frame-${String(index + firstFrame).padStart(3, "0")}.png`;
+          return frame;
+        });
+
+        if (!context) {
+          return;
+        }
+
+        const drawNextFrame = () => {
+          const frame = frames[frameIndex - firstFrame];
+
+          if (!frame.complete) {
+            return;
+          }
+
+          context.clearRect(0, 0, canvas.width, canvas.height);
+          context.drawImage(frame, 0, 0, canvas.width, canvas.height);
+          favicon.href = canvas.toDataURL("image/png");
+          frameIndex = ((frameIndex - firstFrame + 1) % frameCount) + firstFrame;
+        };
+
+        window.setInterval(drawNextFrame, 50);
+      })();
+    </script>
+    <script is:inline>
+      (() => {
+        const sounds = {
+          language: "/pill-select.webm",
+          success: "/pill-select.webm",
+        };
+
+        const volumes = {
+          language: 0.45,
+          success: 0.35,
+        };
+
+        Object.values(sounds).forEach((source) => {
+          const audio = new Audio(source);
+          audio.preload = "auto";
+        });
+
+        const playSound = (name) => {
+          const source = sounds[name];
+
+          if (!source) {
+            return;
+          }
+
+          const audio = new Audio(source);
+          audio.volume = volumes[name] ?? 0.25;
+          return audio.play().catch(() => {
+            // Browsers can reject audio even after a click; the interface still works.
+          });
+        };
+
+        const canDelayNavigation = (event, link) =>
+          event.button === 0 &&
+          !event.defaultPrevented &&
+          !event.metaKey &&
+          !event.ctrlKey &&
+          !event.shiftKey &&
+          !event.altKey &&
+          !link.target &&
+          !link.hasAttribute("download");
+
+        const navigateAfterSound = (link) => {
+          window.setTimeout(() => {
+            window.location.href = link.href;
+          }, 90);
+        };
+
+        window.playMicrockSound = playSound;
+
+        document.addEventListener("click", (event) => {
+          const trigger = event.target?.closest?.("[data-sound]");
+
+          if (!trigger) {
+            return;
+          }
+
+          playSound(trigger.getAttribute("data-sound"));
+        }, { capture: true });
+
+        document.addEventListener("click", (event) => {
+          const link = event.target?.closest?.("a[data-sound]");
+
+          if (!link || !canDelayNavigation(event, link)) {
+            return;
+          }
+
+          event.preventDefault();
+          navigateAfterSound(link);
+        });
+      })();
+    </script>
+    <slot name="head" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;600&family=Space+Grotesk:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>

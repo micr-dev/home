@@ -139,6 +139,7 @@ const page = content[Astro.props.locale];
       const maxOmegaPerStep = 0.32;
       const maxVelocityPerStep = 28;
       const pronunciationCount = 9;
+      const pronunciationVolume = 0.05;
       const pronunciationFiles = Array.from(
         { length: pronunciationCount },
         (_, index) => `/microck-pronunciation-${index + 1}.webm`,
@@ -186,7 +187,7 @@ const page = content[Astro.props.locale];
 
         const index = pronunciationBag.pop();
         lastPronunciation = index;
-        playFile(pronunciationFiles[index], 0.45);
+        playFile(pronunciationFiles[index], pronunciationVolume);
       };
 
       const audio = () => {

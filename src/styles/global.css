@@ -36,6 +36,8 @@
   --font-body: "Helvetica Neue", Helvetica, Arial, sans-serif;
   --font-heading: "Space Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --font-control: "Karla", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --ease-ui-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-ui-in-out: cubic-bezier(0.77, 0, 0.175, 1);
   --cursor-default: url("/cursors/linux-esque-normal-select-28.png") 1 0, auto;
   --cursor-pointer: url("/cursors/linux-esque-link-select-28.png") 4 0, pointer;
 }
@@ -266,6 +268,23 @@ button {
   transition: color 180ms ease;
 }
 
+.nav-group {
+  --nav-children-height: 88px;
+}
+
+.nav-group-trigger {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  font-family: inherit;
+  text-align: left;
+  transition: color 180ms ease, transform 140ms var(--ease-ui-out);
+}
+
+.nav-group-trigger:active {
+  transform: scale(0.985);
+}
+
 .animated-link::after {
   content: "";
   position: absolute;
@@ -294,6 +313,8 @@ button {
 .external-arrow {
   width: 0.68em;
   height: 0.68em;
+  flex: 0 0 auto;
+  overflow: visible;
   opacity: 0;
   transform: translate(0, 4px);
   transition: opacity 220ms ease, transform 220ms ease;
@@ -303,6 +324,63 @@ button {
 .animated-link:focus-visible .external-arrow {
   opacity: 1;
   transform: translate(2px, 0);
+}
+
+.down-chevron {
+  width: 0.72em;
+  height: 0.72em;
+  flex: 0 0 auto;
+  opacity: 0;
+  transform: translateY(-2px);
+  transform-origin: center;
+  transition: opacity 160ms ease, transform 200ms var(--ease-ui-out);
+}
+
+.nav-group-children {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 240ms var(--ease-ui-in-out);
+}
+
+.nav-group-trigger[aria-expanded="true"] + .nav-group-children {
+  max-height: var(--nav-children-height);
+}
+
+.nav-group-children-inner {
+  padding: 0 12px 4px 16px;
+  opacity: 0;
+  transform: translateY(-6px);
+  transition:
+    opacity 180ms ease,
+    transform 220ms var(--ease-ui-out);
+}
+
+.nav-group-trigger[aria-expanded="true"] + .nav-group-children .nav-group-children-inner {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .nav-group-trigger:hover .down-chevron {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.nav-group-trigger:focus-visible .down-chevron,
+.nav-group-trigger[aria-expanded="true"] .down-chevron {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.nav-group-trigger[aria-expanded="true"] .down-chevron {
+  transform: rotate(180deg);
+}
+
+.nav-child-link {
+  min-height: 38px;
+  padding: 8px 0;
+  font-size: 14px;
 }
 
 .social-footer {

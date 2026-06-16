@@ -5,6 +5,13 @@ type Link = {
   href: string;
 };
 
+type NavGroup = {
+  label: string;
+  children: Link[];
+};
+
+type NavItem = Link | NavGroup;
+
 type LocaleContent = {
   locale: Locale;
   htmlLang: string;
@@ -12,7 +19,7 @@ type LocaleContent = {
   description: string;
   name: string;
   subtitle: string;
-  nav: Link[];
+  nav: NavItem[];
   socials: Link[];
   agentLabel: string;
   copyLabel: string;
@@ -48,6 +55,13 @@ export const content: Record<Locale, LocaleContent> = {
       { label: "blog", href: "https://blog.micr.dev" },
       { label: "sobre mi", href: "https://about.micr.dev" },
       { label: "teclados", href: "https://microkeebs.micr.dev" },
+      {
+        label: "ocs",
+        children: [
+          { label: "quarzite", href: "https://quarzite.micr.dev" },
+          { label: "thinko", href: "https://thinko.micr.dev" },
+        ],
+      },
       { label: "espacio", href: "https://room.micr.dev" },
     ],
     socials,
@@ -72,6 +86,13 @@ export const content: Record<Locale, LocaleContent> = {
       { label: "blog", href: "https://blog.micr.dev" },
       { label: "about", href: "https://about.micr.dev" },
       { label: "keebs", href: "https://microkeebs.micr.dev" },
+      {
+        label: "ocs",
+        children: [
+          { label: "quarzite", href: "https://quarzite.micr.dev" },
+          { label: "thinko", href: "https://thinko.micr.dev" },
+        ],
+      },
       { label: "room", href: "https://room.micr.dev" },
     ],
     socials,

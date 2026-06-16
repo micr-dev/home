@@ -1,4 +1,5 @@
 ---
+import DownChevron from "./down-chevron.astro";
 import ExternalArrow from "./external-arrow.astro";
 import type { Locale } from "../data/site";
 import { content } from "../data/site";
@@ -8,6 +9,10 @@ type Props = {
 };
 
 const page = content[Astro.props.locale];
+type NavItem = (typeof page.nav)[number];
+
+const isNavGroup = (item: NavItem): item is Extract<NavItem, { children: unknown }> =>
+  "children" in item;
 ---
 
 <main class="page-shell" data-locale={page.locale}>
@@ -46,15 +51,47 @@ const page = content[Astro.props.locale];
 
     <nav class="primary-links" aria-label="primary">
       {
-        page.nav.map((link, index) => (
-          <a
-            class="animated-link block-in"
-            href={link.href}
-            style={`--delay: ${0.05 + index * 0.05}s`}
-          >
-            <span>{link.label}</span>
-            <ExternalArrow />
-          </a>
+        page.nav.map((item, index) => (
+          isNavGroup(item) ? (
+            <div class="nav-group block-in" style={`--delay: ${0.05 + index * 0.05}s`}>
+              <button
+                class="animated-link nav-group-trigger"
+                type="button"
+                aria-expanded="false"
+                aria-controls={`nav-group-${page.locale}-${index}`}
+                data-nav-group-trigger
+                data-sound="toggle"
+              >
+                <span>{item.label}</span>
+                <DownChevron />
+              </button>
+              <div
+                class="nav-group-children"
+                id={`nav-group-${page.locale}-${index}`}
+                data-nav-group-children
+                aria-hidden="true"
+                inert
+              >
+                <div class="nav-group-children-inner">
+                  {item.children.map((child) => (
+                    <a class="animated-link nav-child-link" href={child.href}>
+                      <span>{child.label}</span>
+                      <ExternalArrow />
+                    </a>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <a
+              class="animated-link block-in"
+              href={item.href}
+              style={`--delay: ${0.05 + index * 0.05}s`}
+            >
+              <span>{item.label}</span>
+              <ExternalArrow />
+            </a>
+          )
         ))
       }
     </nav>
@@ -108,6 +145,24 @@ const page = content[Astro.props.locale];
     document.querySelectorAll("[data-language-choice]").forEach((link) => {
       link.addEventListener("click", () => {
         storeChoice(link.getAttribute("data-language-choice"));
+      });
+    });
+
+    document.querySelectorAll("[data-nav-group-trigger]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const expanded = button.getAttribute("aria-expanded") === "true";
+        const childrenId = button.getAttribute("aria-controls");
+        const children = childrenId ? document.getElementById(childrenId) : null;
+        const nextExpanded = !expanded;
+
+        button.setAttribute("aria-expanded", String(nextExpanded));
+
+        if (!children) {
+          return;
+        }
+
+        children.setAttribute("aria-hidden", String(!nextExpanded));
+        children.toggleAttribute("inert", !nextExpanded);
       });
     });
 

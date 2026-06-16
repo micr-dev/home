@@ -73,11 +73,13 @@ const { title, description, lang } = Astro.props;
         const sounds = {
           language: "/pill-select.webm",
           success: "/pill-select.webm",
+          toggle: "/pill-select.webm",
         };
 
         const volumes = {
           language: 0.45,
           success: 0.35,
+          toggle: 0.3,
         };
 
         Object.values(sounds).forEach((source) => {

@@ -50,7 +50,7 @@ export const content: Record<Locale, LocaleContent> = {
     subtitle: "creando herramientas para agentes de IA y desarrolladores.",
     nav: [
       { label: "proyectos", href: "https://proyectos.micr.dev" },
-      { label: "skills", href: "https://wip.micr.dev" },
+      { label: "skills", href: "https://skills.micr.dev" },
       { label: "ia", href: "https://ai.micr.dev" },
       { label: "blog", href: "https://blog.micr.dev" },
       { label: "sobre mi", href: "https://about.micr.dev" },
@@ -81,7 +81,7 @@ export const content: Record<Locale, LocaleContent> = {
     subtitle: "building tools for AI agents and developers.",
     nav: [
       { label: "projects", href: "https://projects.micr.dev" },
-      { label: "skills", href: "https://wip.micr.dev" },
+      { label: "skills", href: "https://skills.micr.dev" },
       { label: "ai", href: "https://ai.micr.dev" },
       { label: "blog", href: "https://blog.micr.dev" },
       { label: "about", href: "https://about.micr.dev" },

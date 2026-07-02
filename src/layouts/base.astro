@@ -150,6 +150,13 @@ const { title, description, lang } = Astro.props;
     />
   </head>
   <body>
+    <figure class="noise-overlay" aria-hidden="true">
+      <svg>
+        <filter id="noise-bg-fx">
+          <feTurbulence baseFrequency="0.8" />
+        </filter>
+      </svg>
+    </figure>
     <slot />
   </body>
 </html>

@@ -87,18 +87,12 @@ const { title, description, lang } = Astro.props;
           audio.preload = "auto";
         });
 
-        const playSound = (name) => {
+        const playFile = (name) => {
           const source = sounds[name];
-
-          if (!source) {
-            return;
-          }
-
+          if (!source) return;
           const audio = new Audio(source);
           audio.volume = volumes[name] ?? 0.25;
-          return audio.play().catch(() => {
-            // Browsers can reject audio even after a click; the interface still works.
-          });
+          return audio.play().catch(() => {});
         };
 
         const canDelayNavigation = (event, link) =>
@@ -117,7 +111,7 @@ const { title, description, lang } = Astro.props;
           }, 90);
         };
 
-        window.playMicrockSound = playSound;
+        window.playMicrockSound = playFile;
 
         document.addEventListener("click", (event) => {
           const trigger = event.target?.closest?.("[data-sound]");
@@ -126,7 +120,7 @@ const { title, description, lang } = Astro.props;
             return;
           }
 
-          playSound(trigger.getAttribute("data-sound"));
+          playFile(trigger.getAttribute("data-sound"));
         }, { capture: true });
 
         document.addEventListener("click", (event) => {
@@ -140,6 +134,64 @@ const { title, description, lang } = Astro.props;
           navigateAfterSound(link);
         });
       })();
+    </script>
+    <script>
+      // Cuelume toggle recipe: two bandpass-filtered noise bursts.
+      // Synthesized inline so we can control the output gain to match
+      // the 0.45 volume the old /pill-select.webm file used.
+      const playLanguageToggle = (() => {
+        let ctx = null;
+
+        const noiseBurst = (context, dest, freq, q, peak, offset, attack, decay) => {
+          const dur = attack + decay + 0.05;
+          const len = Math.max(1, Math.floor(dur * context.sampleRate));
+          const buf = context.createBuffer(1, len, context.sampleRate);
+          const data = buf.getChannelData(0);
+          for (let i = 0; i < len; i++) data[i] = 2 * Math.random() - 1;
+
+          const src = context.createBufferSource();
+          src.buffer = buf;
+
+          const filter = context.createBiquadFilter();
+          filter.type = "bandpass";
+          filter.frequency.value = freq;
+          filter.Q.value = q;
+
+          const gain = context.createGain();
+          const t = context.currentTime + offset;
+          gain.gain.setValueAtTime(0.0001, t);
+          gain.gain.exponentialRampToValueAtTime(peak, t + attack);
+          gain.gain.exponentialRampToValueAtTime(0.0001, t + attack + decay);
+
+          src.connect(filter).connect(gain).connect(dest);
+          src.start(t);
+          src.stop(t + dur);
+        };
+
+        return () => {
+          if (!ctx) {
+            const Ctor = window.AudioContext || window.webkitAudioContext;
+            if (!Ctor) return;
+            ctx = new Ctor();
+          }
+          if (ctx.state !== "running") ctx.resume().catch(() => {});
+
+          const master = ctx.createGain();
+          // Scale so effective peak ≈ 0.45 (matching old HTML5 Audio volume)
+          // Layer peaks are 0.12/0.1; 0.45 / 0.12 ≈ 3.75
+          master.gain.value = 3.75;
+          master.connect(ctx.destination);
+
+          noiseBurst(ctx, master, 2200, 1.6, 0.12, 0,     0.001, 0.016);
+          noiseBurst(ctx, master, 3800, 1.6, 0.10, 0.024, 0.001, 0.020);
+        };
+      })();
+
+      document.addEventListener("click", (event) => {
+        const trigger = event.target?.closest?.('[data-sound="language"]');
+        if (!trigger) return;
+        playLanguageToggle();
+      }, { capture: true });
     </script>
     <slot name="head" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />

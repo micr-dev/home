@@ -51,7 +51,13 @@ export const content: Record<Locale, LocaleContent> = {
     nav: [
       { label: "proyectos", href: "https://proyectos.micr.dev" },
       { label: "skills", href: "https://skills.micr.dev" },
-      { label: "ia", href: "https://ai.micr.dev" },
+      {
+        label: "ia",
+        children: [
+          { label: "stack", href: "https://ai.micr.dev" },
+          { label: "usage", href: "https://tokens.micr.dev" },
+        ],
+      },
       { label: "blog", href: "https://blog.micr.dev" },
       { label: "sobre mi", href: "https://about.micr.dev" },
       { label: "teclados", href: "https://microkeebs.micr.dev" },
@@ -82,7 +88,13 @@ export const content: Record<Locale, LocaleContent> = {
     nav: [
       { label: "projects", href: "https://projects.micr.dev" },
       { label: "skills", href: "https://skills.micr.dev" },
-      { label: "ai", href: "https://ai.micr.dev" },
+      {
+        label: "ai",
+        children: [
+          { label: "stack", href: "https://ai.micr.dev" },
+          { label: "usage", href: "https://tokens.micr.dev" },
+        ],
+      },
       { label: "blog", href: "https://blog.micr.dev" },
       { label: "about", href: "https://about.micr.dev" },
       { label: "keebs", href: "https://microkeebs.micr.dev" },

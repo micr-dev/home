@@ -145,4 +145,6 @@
   tags: [implemented]
 
 ## seo
-- the Microck language routes expose route-specific canonical and alternate URLs, descriptive search metadata, social cards, Person and WebSite structured data, and a robots-linked sitemap without changing visible landing-page content @implemented
+- label: the Microck language routes expose route-specific canonical and alternate URLs, descriptive search metadata, social cards, Person and WebSite structured data, and a robots-linked sitemap without changing visible landing-page content
+  command: npm run build
+  tags: [implemented]

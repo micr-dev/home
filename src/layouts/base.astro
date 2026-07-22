@@ -10,8 +10,8 @@ type Props = {
 const { title, description, lang } = Astro.props;
 const siteOrigin = Astro.site ?? new URL("https://micr.dev");
 const canonicalUrl = new URL(Astro.url.pathname, siteOrigin);
-const englishUrl = new URL("/en", siteOrigin);
-const spanishUrl = new URL("/es", siteOrigin);
+const englishUrl = new URL("/en/", siteOrigin);
+const spanishUrl = new URL("/es/", siteOrigin);
 const defaultUrl = new URL("/", siteOrigin);
 const structuredData = {
   "@context": "https://schema.org",
@@ -20,7 +20,7 @@ const structuredData = {
       "@type": "Person",
       "@id": "https://micr.dev/#identity",
       name: "Microck",
-      url: "https://micr.dev/en",
+      url: "https://micr.dev/en/",
       sameAs: [
         "https://github.com/Microck",
         "https://x.com/JustMicrock",

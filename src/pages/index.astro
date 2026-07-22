@@ -27,8 +27,8 @@ import Base from "../layouts/base.astro";
         <span class="gate-title-es">elige tu idioma</span>
       </p>
       <div class="gate-actions block-in" style="--delay: 0.06s">
-        <a href="/es" data-choice="es" data-sound="language">español</a>
-        <a href="/en" data-choice="en" data-sound="language">english</a>
+        <a href="/es/" data-choice="es" data-sound="language">español</a>
+        <a href="/en/" data-choice="en" data-sound="language">english</a>
       </div>
     </section>
   </main>
@@ -37,7 +37,7 @@ import Base from "../layouts/base.astro";
     try {
       const storedLanguage = window.localStorage.getItem("microck-language");
       if (storedLanguage === "es" || storedLanguage === "en") {
-        window.location.replace(`/${storedLanguage}`);
+        window.location.replace(`/${storedLanguage}/`);
       }
     } catch {
       // The gate stays usable without storage.

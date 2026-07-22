@@ -1,0 +1,20 @@
+# Microck
+
+> Microck builds tools and resources for AI agents and developers.
+
+## Site languages
+
+- [English](https://micr.dev/en/): English landing page.
+- [Espanol](https://micr.dev/es/): Spanish landing page.
+
+## Projects
+
+- [Akron](https://akron.micr.dev/): Celeste mod downloads and documentation.
+- [kagi CLI](https://kagi.micr.dev/): Command-line interface and MCP server documentation for Kagi.
+- [Moji](https://moji.micr.dev/): Font discovery and download CLI documentation.
+
+## Profiles
+
+- [GitHub](https://github.com/Microck): Source code and projects.
+- [X](https://x.com/JustMicrock): Updates from Microck.
+- [YouTube](https://www.youtube.com/@Microck): Videos from Microck.

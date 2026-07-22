@@ -1,5 +1,7 @@
 {
   "redirects": [
+    { "source": "/en", "destination": "/en/", "permanent": true },
+    { "source": "/es", "destination": "/es/", "permanent": true },
     { "source": "/tree", "destination": "https://tree.micr.dev/", "permanent": true },
     { "source": "/tree/:match*", "destination": "https://tree.micr.dev/:match*", "permanent": true },
     { "source": "/wip", "destination": "https://wip.micr.dev/", "permanent": true },

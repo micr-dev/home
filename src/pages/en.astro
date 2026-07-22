@@ -6,6 +6,6 @@ import Base from "../layouts/base.astro";
 const page = content.en;
 ---
 
-<Base title={page.title} description={page.description} lang={page.htmlLang}>
+<Base title={page.seoTitle} description={page.seoDescription} lang={page.htmlLang}>
   <LandingPage locale="en" />
 </Base>

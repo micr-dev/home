@@ -17,6 +17,8 @@ type LocaleContent = {
   htmlLang: string;
   title: string;
   description: string;
+  seoTitle: string;
+  seoDescription: string;
   name: string;
   subtitle: string;
   nav: NavItem[];
@@ -46,6 +48,9 @@ export const content: Record<Locale, LocaleContent> = {
     htmlLang: "es",
     title: "Microck",
     description: "creando herramientas para agentes de IA y desarrolladores.",
+    seoTitle: "Microck - herramientas para agentes de IA y desarrolladores",
+    seoDescription:
+      "Sitio oficial de Microck: herramientas, proyectos y recursos para agentes de IA y desarrolladores.",
     name: "Microck",
     subtitle: "creando herramientas para agentes de IA y desarrolladores.",
     nav: [
@@ -83,6 +88,9 @@ export const content: Record<Locale, LocaleContent> = {
     htmlLang: "en",
     title: "Microck",
     description: "building tools for AI agents and developers.",
+    seoTitle: "Microck - tools for AI agents and developers",
+    seoDescription:
+      "The official Microck site for tools, projects, and resources built for AI agents and developers.",
     name: "Microck",
     subtitle: "building tools for AI agents and developers.",
     nav: [

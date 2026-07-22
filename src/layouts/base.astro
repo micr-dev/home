@@ -8,6 +8,36 @@ type Props = {
 };
 
 const { title, description, lang } = Astro.props;
+const siteOrigin = Astro.site ?? new URL("https://micr.dev");
+const canonicalUrl = new URL(Astro.url.pathname, siteOrigin);
+const englishUrl = new URL("/en", siteOrigin);
+const spanishUrl = new URL("/es", siteOrigin);
+const defaultUrl = new URL("/", siteOrigin);
+const structuredData = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Person",
+      "@id": "https://micr.dev/#identity",
+      name: "Microck",
+      url: "https://micr.dev/en",
+      sameAs: [
+        "https://github.com/Microck",
+        "https://x.com/JustMicrock",
+        "https://www.youtube.com/@Microck",
+      ],
+      knowsAbout: ["AI agents", "developer tools", "command-line interfaces"],
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://micr.dev/#website",
+      name: "Microck",
+      url: "https://micr.dev/",
+      inLanguage: ["en", "es"],
+      publisher: { "@id": "https://micr.dev/#identity" },
+    },
+  ],
+};
 ---
 
 <!doctype html>
@@ -18,9 +48,21 @@ const { title, description, lang } = Astro.props;
     <meta name="color-scheme" content="dark" />
     <meta name="theme-color" content="#121212" />
     <meta name="description" content={description} />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:site_name" content="Microck" />
+    <meta property="og:locale" content={lang === "es" ? "es_ES" : "en_US"} />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <link rel="canonical" href={canonicalUrl} />
+    <link rel="alternate" hreflang="en" href={englishUrl} />
+    <link rel="alternate" hreflang="es" href={spanishUrl} />
+    <link rel="alternate" hreflang="x-default" href={defaultUrl} />
+    <script type="application/ld+json" set:html={JSON.stringify(structuredData)} />
     <title>{title}</title>
     <link id="favicon" rel="icon" href="/favicon-frames/frame-000.png" type="image/png" />
     <script is:inline>

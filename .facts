@@ -62,6 +62,12 @@
 - label: ocs parent uses an animated chevron disclosure icon while child links keep unclipped external arrows
   command: test -f src/components/down-chevron.astro && grep -Fq 'DownChevron' src/components/landing-page.astro && grep -Fq '.nav-group-trigger:hover .down-chevron' src/styles/global.css && grep -Fq 'overflow: visible;' src/styles/global.css
   tags: [implemented]
+- label: the English AI menu links stance to the public AI position page
+  command: grep -Fq '{ label: "stance", href: "https://stance.micr.dev" }' src/data/site.ts
+  tags: [spec, implemented]
+- label: the Spanish IA menu links postura to the public AI position page
+  command: grep -Fq '{ label: "postura", href: "https://stance.micr.dev" }' src/data/site.ts
+  tags: [spec, implemented]
 
 ## llms
 

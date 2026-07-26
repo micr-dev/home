@@ -61,6 +61,7 @@ export const content: Record<Locale, LocaleContent> = {
         children: [
           { label: "stack", href: "https://ai.micr.dev" },
           { label: "usage", href: "https://tokens.micr.dev" },
+          { label: "postura", href: "https://stance.micr.dev" },
         ],
       },
       { label: "blog", href: "https://blog.micr.dev" },
@@ -101,6 +102,7 @@ export const content: Record<Locale, LocaleContent> = {
         children: [
           { label: "stack", href: "https://ai.micr.dev" },
           { label: "usage", href: "https://tokens.micr.dev" },
+          { label: "stance", href: "https://stance.micr.dev" },
         ],
       },
       { label: "blog", href: "https://blog.micr.dev" },

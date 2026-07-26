@@ -278,10 +278,6 @@ button {
   transition: color 180ms ease;
 }
 
-.nav-group {
-  --nav-children-height: 88px;
-}
-
 .nav-group-trigger {
   width: 100%;
   border: 0;

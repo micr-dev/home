@@ -53,7 +53,10 @@ const isNavGroup = (item: NavItem): item is Extract<NavItem, { children: unknown
       {
         page.nav.map((item, index) => (
           isNavGroup(item) ? (
-            <div class="nav-group block-in" style={`--delay: ${0.05 + index * 0.05}s`}>
+            <div
+              class="nav-group block-in"
+              style={`--delay: ${0.05 + index * 0.05}s; --nav-children-height: ${item.children.length * 44}px`}
+            >
               <button
                 class="animated-link nav-group-trigger"
                 type="button"

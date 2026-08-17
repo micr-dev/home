@@ -34,6 +34,7 @@ const socials: Link[] = [
   { label: "gh", href: "https://github.com/Microck" },
   { label: "x", href: "https://x.com/JustMicrock" },
   { label: "yt", href: "https://www.youtube.com/@Microck" },
+  { label: "anon feedback", href: "https://www.admonymous.co/microck" },
 ];
 
 const englishCopyPrompt =

@@ -68,6 +68,9 @@
 - label: the Spanish IA menu links postura to the public AI position page
   command: grep -Fq '{ label: "postura", href: "https://stance.micr.dev" }' src/data/site.ts
   tags: [spec, implemented]
+- label: the landing page footer links to the anonymous feedback form as anon feedback
+  command: grep -Fq '{ label: "anon feedback", href: "https://www.admonymous.co/microck" }' src/data/site.ts && grep -Fq 'page.socials.map' src/components/landing-page.astro
+  tags: [spec, implemented]
 
 ## llms
 

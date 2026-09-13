@@ -76,38 +76,44 @@ const structuredData = {
 
         const firstFrame = 0;
         const frameCount = 60;
-        const canvas = document.createElement("canvas");
-        const context = canvas.getContext("2d");
-        let frameIndex = firstFrame;
 
-        canvas.width = 16;
-        canvas.height = 16;
+        const startAnimation = () => {
+          const canvas = document.createElement("canvas");
+          const context = canvas.getContext("2d");
 
-        const frames = Array.from({ length: frameCount }, (_, index) => {
-          const frame = new Image();
-          frame.decoding = "async";
-          frame.src = `/favicon-frames/frame-${String(index + firstFrame).padStart(3, "0")}.png`;
-          return frame;
-        });
-
-        if (!context) {
-          return;
-        }
-
-        const drawNextFrame = () => {
-          const frame = frames[frameIndex - firstFrame];
-
-          if (!frame.complete) {
+          if (!context) {
             return;
           }
 
-          context.clearRect(0, 0, canvas.width, canvas.height);
-          context.drawImage(frame, 0, 0, canvas.width, canvas.height);
-          favicon.href = canvas.toDataURL("image/png");
-          frameIndex = ((frameIndex - firstFrame + 1) % frameCount) + firstFrame;
+          let frameIndex = firstFrame;
+          canvas.width = 16;
+          canvas.height = 16;
+
+          // Keep the animated favicon off the critical path for the language gate.
+          const frames = Array.from({ length: frameCount }, (_, index) => {
+            const frame = new Image();
+            frame.decoding = "async";
+            frame.src = `/favicon-frames/frame-${String(index + firstFrame).padStart(3, "0")}.png`;
+            return frame;
+          });
+
+          const drawNextFrame = () => {
+            const frame = frames[frameIndex - firstFrame];
+
+            if (!frame.complete) {
+              return;
+            }
+
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            context.drawImage(frame, 0, 0, canvas.width, canvas.height);
+            favicon.href = canvas.toDataURL("image/png");
+            frameIndex = ((frameIndex - firstFrame + 1) % frameCount) + firstFrame;
+          };
+
+          window.setInterval(drawNextFrame, 50);
         };
 
-        window.setInterval(drawNextFrame, 50);
+        window.addEventListener("load", startAnimation, { once: true });
       })();
     </script>
     <script is:inline>

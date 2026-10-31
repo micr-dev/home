@@ -423,7 +423,7 @@ button {
   margin-top: 14px;
   display: grid;
   justify-items: center;
-  gap: 10px;
+  gap: 4px;
   text-align: center;
 }
 

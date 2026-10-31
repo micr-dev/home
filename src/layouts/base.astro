@@ -1,5 +1,6 @@
 ---
 import "../styles/global.css";
+import Screensaver from "../components/screensaver.astro";
 
 type Props = {
   title: string;
@@ -258,5 +259,6 @@ const structuredData = {
       </svg>
     </figure>
     <slot />
+    <Screensaver />
   </body>
 </html>

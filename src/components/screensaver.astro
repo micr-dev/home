@@ -1,0 +1,58 @@
+<canvas class="screensaver" data-screensaver hidden aria-hidden="true"></canvas>
+
+<style>
+  .screensaver:not([hidden]) {
+    position: fixed;
+    inset: 0;
+    z-index: 2147483647;
+    width: 100%;
+    height: 100%;
+    background: rgb(0 0 0 / 85%);
+    pointer-events: none;
+  }
+</style>
+
+<script>
+  import type { PipesInstance } from "../vendor/pierre-pipes/index";
+
+  const canvas = document.querySelector<HTMLCanvasElement>("[data-screensaver]");
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  let timer: number | undefined;
+  let pipes: PipesInstance | undefined;
+  let generation = 0;
+
+  function restart() {
+    window.clearTimeout(timer);
+    generation++;
+    pipes?.destroy();
+    pipes = undefined;
+    if (!canvas) return;
+    canvas.hidden = true;
+    if (document.hidden || reducedMotion.matches) return;
+
+    const current = generation;
+    timer = window.setTimeout(async () => {
+      // The visitor may return while the renderer is still loading.
+      try {
+        const { createPipes } = await import("../vendor/pierre-pipes/index");
+        if (current !== generation || document.hidden || reducedMotion.matches) return;
+        canvas.hidden = false;
+        pipes = createPipes(canvas, {
+          pixelSize: 3,
+          backgroundColor: "transparent",
+          cameraDrift: true,
+        });
+      } catch {
+        // A browser without WebGL2 can still use the site normally.
+        canvas.hidden = true;
+      }
+    }, 60_000);
+  }
+
+  for (const event of ["pointermove", "pointerdown", "keydown", "wheel", "scroll", "touchstart"]) {
+    document.addEventListener(event, restart, { capture: true, passive: true });
+  }
+  document.addEventListener("visibilitychange", restart);
+  reducedMotion.addEventListener("change", restart);
+  restart();
+</script>

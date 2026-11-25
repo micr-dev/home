@@ -101,6 +101,9 @@
 - label: llms.txt lists the keyboards page as a public surface
   command: grep -Fq 'Keyboards: https://microkeebs.micr.dev' public/en/llms.txt && grep -Fq 'Teclados: https://microkeebs.micr.dev' public/es/llms.txt
   tags: [spec, implemented]
+- label: both localized project branches fetch the generated English project catalogue before selecting the first five current entries in order
+  command: grep -Fq 'first five current projects' public/en/llms.txt && grep -Fq 'cinco primeros proyectos actuales' public/es/llms.txt && grep -Fq 'https://projects.micr.dev/llms.txt' public/en/llms.txt && grep -Fq 'https://projects.micr.dev/llms.txt' public/es/llms.txt
+  tags: [agent-catalogue, spec, implemented]
 
 ## i18n
 
@@ -125,6 +128,9 @@
 - label: the landing page and language gate are centered without upward translate offsets
   command: ! grep -q 'translateY(-[0-9].*vh)' src/styles/global.css
   tags: [spec, implemented]
+- label: the copy prompt button sits 6 pixels closer to the agent label without reducing its 40 pixel minimum touch height
+  command: node -e "const s=require('fs').readFileSync('src/styles/global.css','utf8'); process.exit(/\.agent-block \{[^}]*gap: 4px;/s.test(s) && /\.copy-button \{[^}]*min-height: 40px;/s.test(s) ? 0 : 1)"
+  tags: [agent-spacing, spec, implemented]
 
 ## interactions
 

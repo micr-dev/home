@@ -30,6 +30,11 @@
   command: grep -Fq 'title: "Microck"' src/data/site.ts && grep -Fq '<Base title="Microck"' src/pages/index.astro
   tags: [spec, implemented]
 
+## background
+
+- label: the noise overlay covers the entire viewport without default figure margins
+  tags: [spec, implemented, background]
+
 ## navigation
 
 - label: on mobile the landing page scrolls when content exceeds the viewport and navigation icons remain visible without hover

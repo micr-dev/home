@@ -100,13 +100,13 @@ button {
 .page-shell {
   position: relative;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 48px 24px 34px;
+  overflow-y: auto;
+  padding: 72px 24px 34px;
 }
 
 .landing-card {
   width: min(100%, 328px);
+  margin: auto;
 }
 
 .language-switcher {
@@ -373,6 +373,14 @@ button {
   }
 }
 
+@media (hover: none) {
+  .animated-link .external-arrow,
+  .nav-group-trigger .down-chevron {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 .nav-group-trigger:focus-visible .down-chevron,
 .nav-group-trigger[aria-expanded="true"] .down-chevron {
   opacity: 1;
@@ -392,7 +400,8 @@ button {
 .social-footer {
   display: flex;
   justify-content: center;
-  gap: 22px;
+  flex-wrap: wrap;
+  gap: 0 22px;
   margin-top: 58px;
   padding-top: 20px;
   border-top: 1px solid rgba(255, 255, 255, 0.06);

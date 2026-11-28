@@ -32,6 +32,9 @@
 
 ## navigation
 
+- label: on mobile the landing page scrolls when content exceeds the viewport and navigation icons remain visible without hover
+  tags: [spec, implemented, mobile-layout]
+
 - label: the landing page primary navigation excludes CV and resume links
   command: ! grep -R -I -i -E 'cv|resume|curriculum' src/data/site.ts src/components public
   tags: [spec, implemented]
